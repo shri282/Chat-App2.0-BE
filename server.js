@@ -9,6 +9,7 @@ import { Server } from "socket.io";
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
 connectDB(process.env.MONGO_URI);
 const app = express();
 app.use(express.json());
@@ -38,7 +39,7 @@ const server = app.listen(PORT, () => {
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: CLIENT_ORIGIN,
   },
 });
 
