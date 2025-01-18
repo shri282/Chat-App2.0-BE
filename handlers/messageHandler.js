@@ -1,7 +1,7 @@
 import Message from "../models/message.js";
 import Chat from "../models/chat.js";
 import User from "../models/user.js";
-import io from "../app.js";
+import io from "../server.js";
 
 const sentMessage = async (req, res) => {
     try {
