@@ -39,9 +39,34 @@ const fetchMessages = async (req, res) => {
     }
 };
 
+const updateReadBy = async (req, res) => {
+    const chatId = req.params.chatId;
+    if(!chatId) return res.status(400).json({ message: "Chat id is required" });
+
+    try {
+        const chat = await Chat.findById(chatId);
+        if (chat.isGroupChat) {
+            await Message.updateMany(
+                { chat: chatId, readBy: { $nin: [req.user._id] }, sender: { $ne: req.user._id } },
+                { $addToSet: { readBy: req.user._id } }
+            );
+            io.to(chatId).emit('readBy', { userId : req.user._id, chatId: chatId });
+            return res.status(200).json("the messages updated successfully");
+        }
+   
+        await Message.updateMany({ chat: chatId, readBy: { $size: 0 }, sender: { $ne: req.user._id } }, { $set: { readBy: [req.user._id] } });
+        io.to(chatId).emit('readBy', { userId : req.user._id, chatId: chatId });
+        return res.status(200).json("the messages updated successfully");
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
 const chatHandlers = {
     sentMessage,
-    fetchMessages
+    fetchMessages,
+    updateReadBy
 };
 
 export default chatHandlers;
